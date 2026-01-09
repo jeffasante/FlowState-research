@@ -4,25 +4,17 @@
 
 > FlowState is a research initiative to bridge the gap between Computer Vision and Audio Engineering. It uses a Convolutional Neural Network (CNN) to "see" the texture of music and orchestrate professional-grade transitions autonomously.
 
+[![FlowState Interactive Demo](samples/demo.png)](https://jeffasante.github.io/flowstate-research/docs/)
+_Click the image above to experience the **Interactive Demo**._
+
 ![FlowState Comparison](comparison_spectrogram.png)
 _Figure 1: Comparison of transition techniques. Top: Hard Cut (Jarring). Middle: Standard Crossfade (Muddy/Clashing frequencies). Bottom: FlowState AI (Clean filtering, tension creation, and beat-synced drop)._
 
 **Audio Previews:**
 
-<table>
-  <tr>
-    <td width="200">Baseline: Hard Cut</td>
-    <td><audio controls src="samples/Baseline-Hard-Cut.wav"></audio></td>
-  </tr>
-  <tr>
-    <td>Baseline: Crossfade</td>
-    <td><audio controls src="samples/Baseline-Dumb-Crossfade.wav"></audio></td>
-  </tr>
-  <tr>
-    <td>FlowState AI: The Drop</td>
-    <td><audio controls src="samples/FlowState-AI-DROP.wav"></audio></td>
-  </tr>
-</table>
+- [Baseline: Hard Cut (Listen)](samples/Baseline-Hard-Cut.wav)
+- [Baseline: Crossfade (Listen)](samples/Baseline-Dumb-Crossfade.wav)
+- [FlowState AI: The Drop (Listen)](samples/FlowState-AI-DROP.wav)
 
 ---
 
