@@ -76,7 +76,7 @@
                         <span class="track-type-tag" id="classA">WAITING</span>
                     </div>
                     <div class="side-toggle">-</div>
-                    <input type="file" id="inputA" accept="audio/*" hidden>
+                    <input type="file" id="inputA" accept="audio/*,.wav,.mp3,.m4a,.aac,.flac,.aiff" hidden>
                 </section>
                 
                 <section class="panel track-panel" id="trackB">
@@ -100,7 +100,7 @@
                         <span class="track-type-tag" id="classB">WAITING</span>
                     </div>
                     <div class="side-toggle">-</div>
-                    <input type="file" id="inputB" accept="audio/*" hidden>
+                    <input type="file" id="inputB" accept="audio/*,.wav,.mp3,.m4a,.aac,.flac,.aiff" hidden>
                 </section>
 
                 <button class="main-action-btn" id="processBtn" disabled>
@@ -200,7 +200,7 @@
                         <span class="track-filename">SAMPLE RATE: <span id="exportRate">22050Hz</span></span>
                         <span class="track-filename">CHANNELS: <span id="exportChannels">STEREO (INTERLEAVED)</span></span>
                         <br>
-                        <button class="main-action-btn" style="padding:16px; font-size:0.8rem;">GENERATE LOGS [JSON]</button>
+                        <button class="main-action-btn" id="exportLogsBtn" style="padding:16px; font-size:0.8rem;">GENERATE LOGS [JSON]</button>
                     </div>
                 </section>
             </div>

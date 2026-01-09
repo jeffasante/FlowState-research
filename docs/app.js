@@ -80,6 +80,7 @@ function cacheElements() {
     elements.processBtn = document.getElementById('processBtn');
     elements.playBtn = document.getElementById('playBtn');
     elements.downloadBtn = document.getElementById('downloadBtn');
+    elements.exportLogsBtn = document.getElementById('exportLogsBtn');
     elements.durationDisplay = document.getElementById('durationDisplay');
     
     // Visualization
@@ -291,6 +292,12 @@ function setupEventListeners() {
     
     elements.processBtn?.addEventListener('click', processTransition);
     elements.downloadBtn?.addEventListener('click', exportWAV);
+    if(elements.exportLogsBtn) {
+        console.log('[FlowState] Attaching listener to exportLogsBtn');
+        elements.exportLogsBtn.addEventListener('click', exportLogs);
+    } else {
+        console.error('[FlowState] exportLogsBtn NOT FOUND');
+    }
     
     // Playback Listeners
     elements.playBtn?.addEventListener('click', () => 
@@ -1308,5 +1315,57 @@ function audioBufferToWav(buffer) {
     return view.buffer;
 }
 function writeString(v, o, s) { for (let i=0; i<s.length; i++) v.setUint8(o+i, s.charCodeAt(i)); }
+
+function exportLogs() {
+    console.log('[FlowState] Generating logs...');
+    const logs = {
+        timestamp: new Date().toISOString(),
+        configuration: CONFIG,
+        model: {
+            type: state.modelType,
+            status: elements.modelStatusText?.textContent || 'UNKNOWN'
+        },
+        session: {
+            transitionDuration: state.transitionDuration,
+            filterIntensity: state.filterIntensity,
+            mode: elements.compareModeInfo?.textContent || 'UNKNOWN'
+        },
+        trackA: {
+            filename: state.trackA.filename,
+            classification: state.trackA.classification,
+            confidence: state.trackA.confidence
+        },
+        trackB: {
+            filename: state.trackB.filename,
+            classification: state.trackB.classification,
+            confidence: state.trackB.confidence
+        },
+        features: {
+            // These would be populated if you store them in state during analyzeFeatures
+            // currently they are just in the DOM, so we can scrape them or leave as future work
+            fluxA: document.getElementById('featFluxA')?.textContent,
+            zcrA: document.getElementById('featZcrA')?.textContent,
+            fluxB: document.getElementById('featFluxB')?.textContent,
+            zcrB: document.getElementById('featZcrB')?.textContent
+        }
+    };
+
+    const blob = new Blob([JSON.stringify(logs, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `flowstate_logs_${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// Ensure AudioContext is resumed (fixing Safari/Apple autoplay policy)
+document.addEventListener('click', async () => {
+    if (state.audioContext && state.audioContext.state === 'suspended') {
+        await state.audioContext.resume();
+        console.log('[FlowState] AudioContext resumed by user interaction.');
+    }
+}, { once: true }); // Only try once
+
 
 document.addEventListener('DOMContentLoaded', init);
