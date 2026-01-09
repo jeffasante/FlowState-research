@@ -3,9 +3,9 @@
  * app.js - The Brain + Muscle
  */
 
-// ============================================
+
 // CONFIGURATION
-// ============================================
+
 const CONFIG = {
     MODEL_HEAVY: './model/flowstate_brain_v2.onnx',
     MODEL_LIGHT: './model/flowstate_brain_v2_quantized.onnx',
@@ -15,9 +15,8 @@ const CONFIG = {
     TARGET_SAMPLES: 65536,
 };
 
-// ============================================
+
 // STATE
-// ============================================
 const state = {
     audioContext: null,
     modelSession: null,
@@ -48,9 +47,8 @@ const state = {
     filterIntensity: 80
 };
 
-// ============================================
+
 // DOM ELEMENTS
-// ============================================
 const elements = {};
 
 function cacheElements() {
@@ -104,9 +102,8 @@ function cacheElements() {
     elements.compareModeInfo = document.getElementById('compareModeInfo');
 }
 
-// ============================================
+
 // INITIALIZATION
-// ============================================
 async function init() {
     cacheElements();
     
@@ -275,9 +272,8 @@ function updateStatus(text, status) {
     }
 }
 
-// ============================================
+
 // EVENT LISTENERS
-// ============================================
 function setupEventListeners() {
     elements.loadTrackA?.addEventListener('click', () => elements.inputA?.click());
     elements.loadTrackB?.addEventListener('click', () => elements.inputB?.click());
@@ -432,9 +428,8 @@ async function loadAudioFile(file, track) {
     }
 }
 
-// ============================================
+
 // VISUALIZATION
-// ============================================
 function getCanvasCssSize(canvas, fallbackW, fallbackH) {
     // Prefer actual rendered size; fall back to parent box; then to provided fallback.
     const rect = canvas.getBoundingClientRect();
@@ -496,7 +491,7 @@ function drawWaveform(canvas, audioBuffer, bgColor = '#f0f0f0', fgColor = '#0000
     ctx.lineWidth = 1;
     ctx.beginPath();
 
-    // Fix: Step by 2 pixels to create "gaps" so it doesn't look like a solid block
+    // Step by 2 pixels to create "gaps" so it doesn't look like a solid block
     for (let x = 0; x < w; x += 2) {
         const start = x * step;
         const end = Math.min(start + step * 2, data.length); // Include the skipped pixel in analysis
@@ -507,8 +502,8 @@ function drawWaveform(canvas, audioBuffer, bgColor = '#f0f0f0', fgColor = '#0000
                 const v = Math.abs(data[i]) / maxAbs;
                 if (v > peak) peak = v;
             }
-            // Fix: Square the value to visually "un-compress" the waveform (makes it spikier)
-            // Fix: Keep height at 0.45 (90% total) now that we have gaps
+            // Square the value to visually "un-compress" the waveform (makes it spikier)
+            // Keep height at 0.45 (90% total) now that we have gaps
             const amp = (peak * peak) * (h * 0.45); 
             ctx.moveTo(x + 0.5, midY - amp);
             ctx.lineTo(x + 0.5, midY + amp);
@@ -619,9 +614,9 @@ function drawSpectrogram(canvas, buffer) {
     }
 }
 
-// ============================================
+
 // AI CLASSIFICATION
-// ============================================
+
 async function classifyTrack(track) {
     const trackData = track === 'A' ? state.trackA : state.trackB;
     if (!trackData.buffer) return;
@@ -642,21 +637,19 @@ async function classifyTrack(track) {
         console.log(`[FlowState] Tensor data sample (first 10): [${Array.from(tensor.data.slice(0, 10)).map(x => x.toFixed(4)).join(', ')}]`);
         console.log(`[FlowState] Tensor data sample (last 10): [${Array.from(tensor.data.slice(-10)).map(x => x.toFixed(4)).join(', ')}]`);
         
-        // --- FIX: Dynamic Input Name ---
+        // --- Dynamic Input Name ---
         const feeds = {};
         const inputName = state.modelSession.inputNames[0]; // Get actual name from model
         feeds[inputName] = tensor;
         console.log(`[FlowState] Input name: ${inputName}`);
         
         const results = await state.modelSession.run(feeds);
-        // -------------------------------
 
-        // --- FIX: Dynamic Output Name ---
+        // --- Dynamic Output Name ---
         const outputName = state.modelSession.outputNames[0];
         console.log(`[FlowState] Output name: ${outputName}`);
         console.log(`[FlowState] Full output: [${Array.from(results[outputName].data).map(x => x.toFixed(6)).join(', ')}]`);
         const output = results[outputName].data[0];
-        // -------------------------------
         
         // Debug: Log prediction like Python does
         console.log(`[FlowState] Track ${track} (${segment}): pred=${output.toFixed(4)} → ${output < 0.5 ? 'RHYTHMIC' : 'HARMONIC'}`);
@@ -847,9 +840,8 @@ function createMelFilterbank(nFft, nMels, sr) {
     return filters;
 }
 
-// ============================================
+
 // FEATURE ANALYSIS & UI UPDATES
-// ============================================
 function analyzeFeatures(buffer) {
     if (!buffer) return { zcr: 0, flux: 0, bpm: 0 };
     
@@ -885,11 +877,7 @@ function analyzeFeatures(buffer) {
         prevEnergy = energy;
     }
     const flux = chunks > 0 ? totalFlux / chunks : 0;
-    
-    // 3. BPM Placeholder (Pulse Clarity or Peak Detect is complex, return estimate)
-    // For now, return a placeholder based on classification
-    // In a real app, use a dedicated beat detection algo
-    
+ 
     return { zcr, flux };
 }
 
@@ -983,9 +971,9 @@ function getMode(typeA, typeB) {
     return 'DROP';
 }
 
-// ============================================
+
 // PROCESSING ENGINE & GENERATORS
-// ============================================
+
 async function processTransition() {
     if (!state.trackA.buffer || !state.trackB.buffer) return;
     
@@ -1100,11 +1088,10 @@ function generateDropTransition(bufferA, bufferB, trimB) {
     const output = state.audioContext.createBuffer(2, lengthA + gapSamples + lengthB, CONFIG.SAMPLE_RATE);
 
     for (let c = 0; c < 2; c++) {
-        // --- FIX: Create NEW filters for EVERY channel ---
+        // --- Create NEW filters for EVERY channel ---
         const f1 = createHighPassFilter(800, CONFIG.SAMPLE_RATE, 0.707);
         const f2 = createHighPassFilter(800, CONFIG.SAMPLE_RATE, 0.707);
         const f3 = createHighPassFilter(800, CONFIG.SAMPLE_RATE, 0.707);
-        // -------------------------------------------------
 
         const dataA = bufferA.getChannelData(c % bufferA.numberOfChannels);
         const dataB = bufferB.getChannelData(c % bufferB.numberOfChannels);
@@ -1179,11 +1166,11 @@ function findFirstBeat(b) {
 function createHighPassFilter(f,r,q){const w=2*Math.PI*f/r,a=Math.sin(w)/(2*q),c=Math.cos(w),n=1+a;return{b0:((1+c)/2)/n,b1:(-(1+c))/n,b2:((1+c)/2)/n,a1:(-2*c)/n,a2:(1-a)/n,z1:0,z2:0};}
 function processFilter(f,s){const o=f.b0*s+f.b1*f.z1+f.b2*f.z2-f.a1*f.z1-f.a2*f.z2;f.z2=f.z1;f.z1=o;return o;}
 
-// ============================================
+
 // PLAYBACK & PLAYHEAD ANIMATION
-// ============================================
+
 async function togglePlayback(buffer, btn, canvas, type) {
-    // --- FIX: Resume Context on Click ---
+    // --- Resume Context on Click ---
     if (state.audioContext.state === 'suspended') {
         await state.audioContext.resume();
     }
