@@ -1,0 +1,24 @@
+node_modules
+.DS_Store
+dist
+.env
+*.log
+
+# Research & Data
+research_data/
+dataset_smart_sliced/
+dataset_sliced/
+flowstate_dsp/
+
+# Notebooks & Scripts
+analyze_visuals.ipynb
+compare_spec.py
+
+# Generated Audio Artifacts
+mix_ai_echo_freeze.wav
+mix_normal_crossfade.wav
+temp_ai.wav
+temp_cut.wav
+temp_fade.wav
+play copy.ipynb
+notes.md

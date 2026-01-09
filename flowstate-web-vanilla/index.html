@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlowState | Brutalist Edition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="bg-wobble"></div>
+    <div class="backdrop"></div>
+    
+    <div class="interface-container">
+        <!-- Header Tabs -->
+        <nav class="tabs-nav">
+            <div class="tab-item active" data-target="view-mixer">MIXER</div>
+            <div class="tab-item" data-target="view-comparison">COMPARE</div>
+            <div class="tab-item" data-target="view-analysis">ANALYSIS</div>
+            <div class="tab-item" data-target="view-export">EXPORT</div>
+            <div class="tab-item" data-target="view-about">ABOUT</div>
+            <div class="close-btn">×</div>
+        </nav>
+
+        <!-- VIEWS CONTAINER -->
+        <div class="content-views">
+            
+            <!-- VIEW: MIXER (Model + Tracks) -->
+            <div id="view-mixer" class="view-section active">
+                <section class="panel summary-panel">
+                    <div class="panel-row top">
+                        <div class="label-col">
+                            <span class="label">SESSION STATUS:</span>
+                        </div>
+                        <div class="data-col right-align">
+                            <div class="data-row">
+                                <span class="highlight">02</span>
+                                <span>CHANNELS</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="highlight" id="modelStatusText">READY</span>
+                                <span id="modelStatusDot" class="status-dot"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="visualization-area">
+                        <canvas id="spectrogram" class="spectrogram-canvas"></canvas>
+                        <div class="viz-overlay">
+                            <span id="patternValue">WAITING FOR INPUT</span>
+                            <span id="confidenceValue" class="confidence">--</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="panel track-panel" id="trackA">
+                    <div class="track-visual-box" id="previewA">
+                        <canvas id="waveformA" class="waveform-canvas"></canvas>
+                        <div class="play-overlay">▶</div>
+                    </div>
+                    <div class="track-middle">
+                        <div class="track-meta-row">01 / SOURCE</div>
+                        <div class="track-controls-col">
+                            <div class="control-label" style="display:none;">FILTER</div>
+                            <div class="stepper-control">
+                                <button class="step-btn">-</button>
+                                <span class="step-val" id="filterVal">80%</span>
+                                <button class="step-btn">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="track-info-col" id="loadTrackA">
+                        <span class="track-filename" id="filenameA">SELECT TRACK A...</span>
+                        <span class="track-type-tag" id="classA">WAITING</span>
+                    </div>
+                    <div class="side-toggle">-</div>
+                    <input type="file" id="inputA" accept="audio/*" hidden>
+                </section>
+                
+                <section class="panel track-panel" id="trackB">
+                    <div class="track-visual-box" id="previewB">
+                        <canvas id="waveformB" class="waveform-canvas"></canvas>
+                        <div class="play-overlay">▶</div>
+                    </div>
+                    <div class="track-middle">
+                        <div class="track-meta-row">02 / TARGET</div>
+                        <div class="track-controls-col">
+                            <div class="control-label" style="display:none;">DURATION</div>
+                            <div class="stepper-control">
+                                <button class="step-btn">-</button>
+                                <span class="step-val" id="durationDisplay">4.0s</span>
+                                <button class="step-btn">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="track-info-col" id="loadTrackB">
+                        <span class="track-filename" id="filenameB">SELECT TRACK B...</span>
+                        <span class="track-type-tag" id="classB">WAITING</span>
+                    </div>
+                    <div class="side-toggle">-</div>
+                    <input type="file" id="inputB" accept="audio/*" hidden>
+                </section>
+
+                <button class="main-action-btn" id="processBtn" disabled>
+                    INITIATE SEQUENCE
+                </button>
+                
+                <div class="secondary-actions">
+                    <button id="playBtn" class="sub-btn" disabled>PLAYBACK</button>
+                    <button id="downloadBtn" class="sub-btn" disabled>EXPORT WAV</button>
+                </div>
+            </div>
+
+            <!-- VIEW: COMPARISON (Spectral Comparison) -->
+            <div id="view-comparison" class="view-section" style="display:none;">
+                <section class="panel">
+                    <div class="panel-row top">
+                        <span class="label">SPECTRAL COMPARISON</span>
+                        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+                            <span id="compareModelInfo" style="font-size:0.65rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-secondary);">MODEL: --</span>
+                            <span id="compareModeInfo" style="font-size:0.65rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-secondary);">MODE: --</span>
+                        </div>
+                    </div>
+
+                    <!-- 1. Hard Cut -->
+                    <div class="comparison-row">
+                        <div class="comp-header">
+                            <span class="comp-title">1. BASELINE: HARD CUT</span>
+                            <button id="playCutBtn" class="mini-play-btn" disabled>▶</button>
+                        </div>
+                        <div class="comp-viz">
+                            <canvas id="specCut" class="comparison-canvas"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- 2. Crossfade -->
+                    <div class="comparison-row">
+                        <div class="comp-header">
+                            <span class="comp-title">2. BASELINE: CROSSFADE</span>
+                            <button id="playFadeBtn" class="mini-play-btn" disabled>▶</button>
+                        </div>
+                        <div class="comp-viz">
+                            <canvas id="specFade" class="comparison-canvas"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- 3. AI Result -->
+                    <div class="comparison-row">
+                        <div class="comp-header">
+                            <span class="comp-title highlight">3. FLOWSTATE AI</span>
+                            <button id="playAIBtn" class="mini-play-btn" disabled>▶</button>
+                        </div>
+                        <div class="comp-viz">
+                            <canvas id="specAI" class="comparison-canvas"></canvas>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- VIEW: ANALYSIS (New/Restored) -->
+            <div id="view-analysis" class="view-section" style="display:none;">
+                <section class="panel">
+                    <div class="panel-row"><span class="label">Features Analysis</span></div>
+                    <div class="track-info-col" style="gap:16px;">
+                        <div>
+                            <span class="track-filename">Track A Features</span>
+                            <p style="font-size: 0.75rem; color:#555; margin-top:4px;">
+                                SPECTRAL FLUX: <span id="featFluxA">--</span><br>
+                                ZERO CROSSING: <span id="featZcrA">--</span><br>
+                                PERCEIVED BPM: <span id="featBpmA">--</span>
+                            </p>
+                        </div>
+                        <div style="border-top:1px solid #eee; padding-top:12px;">
+                            <span class="track-filename">Track B Features</span>
+                            <p style="font-size: 0.75rem; color:#555; margin-top:4px;">
+                                SPECTRAL FLUX: <span id="featFluxB">--</span><br>
+                                ZERO CROSSING: <span id="featZcrB">--</span><br>
+                                PERCEIVED BPM: <span id="featBpmB">--</span>
+                            </p>
+                        </div>
+                        <div style="background:#f4f4f4; padding:12px; border-left:2px solid #000; margin-top:12px;">
+                            <span class="track-filename">Suggested Strategy</span>
+                            <p style="font-size: 0.8rem; font-weight:700; margin-top:4px;">
+                                <span id="analysisTransition">-- -> --</span><br>
+                                MODE: <span id="analysisMode">--</span>
+                            </p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- VIEW: EXPORT -->
+            <div id="view-export" class="view-section" style="display:none;">
+                <section class="panel">
+                    <div class="panel-row"><span class="label">Export Options</span></div>
+                    <div class="track-info-col" style="gap: 12px;">
+                        <span class="track-filename">FORMAT: <span id="exportFormat">WAV (PCM 16-BIT)</span></span>
+                        <span class="track-filename">SAMPLE RATE: <span id="exportRate">22050Hz</span></span>
+                        <span class="track-filename">CHANNELS: <span id="exportChannels">STEREO (INTERLEAVED)</span></span>
+                        <br>
+                        <button class="main-action-btn" style="padding:16px; font-size:0.8rem;">GENERATE LOGS [JSON]</button>
+                    </div>
+                </section>
+            </div>
+
+            <!-- VIEW: ABOUT -->
+            <div id="view-about" class="view-section" style="display:none;">
+                <section class="panel">
+                    <div class="panel-row"><span class="label">About FlowState</span></div>
+                    <p style="font-size: 0.75rem; line-height: 1.6; text-transform: uppercase;">
+                        Neural Audio Transition Engine<br>
+                        Version 1.0.0 (Quantized)<br><br>
+                        Architecture: TinyCNN-V2<br>
+                        Framework: FlowState Engine<br>
+                        DSP: WebAudio API (Custom Nodes)<br><br>
+                        © 2026 Research Prototype by<br>
+                        <a href="https://jeffasante.github.io/" target="_blank" class="author-link">JEFF ASANTE</a>
+                    </p>
+                </section>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.14.0/dist/ort.min.js"></script>
+    <script src="fft.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
