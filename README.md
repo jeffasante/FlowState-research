@@ -4,7 +4,7 @@
 
 > FlowState is a research initiative to bridge the gap between Computer Vision and Audio Engineering. It uses a Convolutional Neural Network (CNN) to "see" the texture of music and orchestrate professional-grade transitions autonomously.
 
-[![FlowState Interactive Demo](samples/demo.png)](https://jeffasante.github.io/flowstate-research/docs/)
+[![FlowState Interactive Demo](samples/demo.png)](https://jeffasante.github.io/FlowState-research/)
 _Click the image above to experience the **Interactive Demo**._
 
 ![FlowState Comparison](comparison_spectrogram.png)
